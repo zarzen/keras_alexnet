@@ -88,21 +88,21 @@ class AlexNet:
 
         train_history = self.model.fit_generator(
             train_generator,
-            steps_per_epoch=int(40000/batch_size),
+            steps_per_epoch=40000 // batch_size,
             validation_data=validation_generator,
-            validation_steps=100,
+            validation_steps=5000 // batch_size,
             epochs=n_epoch,
             verbose=1,
             callbacks=callback_list)
 
         return train_history
 
+
     def save_model(self, save_dir, model_name):
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
         model_path = os.path.join(save_dir, model_name)
         self.model.save(model_path)
-
 
 
     def _get_data_generator(self, data_path, is_train, batch_size):
@@ -129,7 +129,8 @@ if __name__ == '__main__':
     trained_weights = 'weights.best.hdf5'
     if os.path.exists(trained_weights):
         net.model.load_weights(trained_weights, by_name=True)
+        print('loaded weights')
 
-    net.train('./data/train', './data/validation', batch_size=64, learning_rate=0.001)
+    net.train('./data/train', './data/validation', batch_size=32, learning_rate=0.001)
     net.save_model('./', 'trained_alexnet')
 
