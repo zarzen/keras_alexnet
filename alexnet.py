@@ -19,48 +19,48 @@ class AlexNet:
         model = Sequential()
         # conv1
         model.add(Conv2D(96, (11,11), strides=4, padding='valid', activation='relu',
-                         input_shape=input_shape))
+                         input_shape=input_shape, name='conv_1'))
         model.add(BatchNormalization())
         # pool1
         model.add(MaxPooling2D(pool_size=(3,3), strides=2, padding='valid'))
 
         # conv2
         model.add(ZeroPadding2D((2,2)))
-        model.add(Conv2D(256, (5,5), padding='valid', activation='relu'))
+        model.add(Conv2D(256, (5,5), padding='valid', activation='relu', name='conv_2'))
         model.add(BatchNormalization())
         # pool2
         model.add(MaxPooling2D(pool_size=(3,3), strides=2))
 
         # conv3
         model.add(ZeroPadding2D((1,1)))
-        model.add(Conv2D(384, (3,3), padding='valid', activation='relu'))
+        model.add(Conv2D(384, (3,3), padding='valid', activation='relu', name='conv_3'))
         model.add(BatchNormalization())
 
         # conv4
         model.add(ZeroPadding2D((1,1)))
-        model.add(Conv2D(384, (3,3), padding='valid', activation='relu'))
+        model.add(Conv2D(384, (3,3), padding='valid', activation='relu', name='conv_4'))
         model.add(BatchNormalization())
 
         # conv5
         model.add(ZeroPadding2D((1,1)))
-        model.add(Conv2D(256, (3,3), padding='valid', activation='relu'))
+        model.add(Conv2D(256, (3,3), padding='valid', activation='relu', name='conv_5'))
         model.add(BatchNormalization())
         model.add(MaxPooling2D((3,3), strides=2))
 
         # full connected layer
         model.add(Flatten())
-        model.add(Dense(4096, activation='relu'))
+        model.add(Dense(4096, activation='relu', name='dense_1'))
         model.add(BatchNormalization())
         model.add(Dropout(dropout_keep_prob))
 
-        model.add(Dense(4096, activation='relu'))
+        model.add(Dense(4096, activation='relu', name='dense_2'))
         model.add(BatchNormalization())
         model.add(Dropout(dropout_keep_prob))
 
-        model.add(Dense(num_classes))
+        model.add(Dense(num_classes, name='dense_3'))
         model.add(BatchNormalization())
 
-        model.add(Activation('softmax'))
+        model.add(Activation('softmax', name='softmax'))
 
         self.model = model
 
