@@ -57,7 +57,7 @@ class AlexNet:
         model.add(BatchNormalization())
         model.add(Dropout(dropout_keep_prob))
 
-        model.add(Dense(num_classes, activation='relu'))
+        model.add(Dense(num_classes))
         model.add(BatchNormalization())
 
         model.add(Activation('softmax'))
@@ -126,7 +126,10 @@ class AlexNet:
 if __name__ == '__main__':
     net = AlexNet()
     print(net.model.summary())
+    trained_weights = 'weights.best.hdf5'
+    if os.path.exists(trained_weights):
+        net.model.load_weights(trained_weights, by_name=True)
 
-    net.train('./data/train', './data/validation', batch_size=64, learning_rate=0.01)
+    net.train('./data/train', './data/validation', batch_size=64, learning_rate=0.001)
     net.save_model('./', 'trained_alexnet')
 
