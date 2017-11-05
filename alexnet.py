@@ -73,11 +73,12 @@ class AlexNet:
         validation_generator = self._get_data_generator(val_data_path, False, 10)
 
         # model compile
-        optimizer = RMSprop(lr = learning_rate)
+        opt = RMSprop(lr = learning_rate, decay=1e-6)
         sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
-        self.model.compile(optimizer=sgd,
-                      loss='mse',
-                      metrics=['accuracy'])
+        self.model.compile(
+            loss='categorical_crossentropy',
+            optimizer=opt,
+            metrics=['accuracy'])
 
         # check point
         model_weights_path = 'weights.best.hdf5'
