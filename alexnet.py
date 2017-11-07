@@ -16,7 +16,7 @@ def mean_subtraction(x):
     x[:, :, 0] -= 103.939
     x[:, :, 1] -= 116.779
     x[:, :, 2] -= 123.68
-    return x / 255.0
+    return x
 
 
 class AlexNet:
@@ -137,7 +137,7 @@ class AlexNet:
 
 
 if __name__ == '__main__':
-    net = AlexNet()
+    net = AlexNet(num_classes=10)
     print(net.model.summary())
     trained_weights = 'weights.best.hdf5'
     if os.path.exists(trained_weights):
