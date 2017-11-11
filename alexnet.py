@@ -161,6 +161,7 @@ if __name__ == '__main__':
         net.model.load_weights(trained_weights, by_name=True)
         print('loaded weights')
 
-    net.train('./data/train', './data/validation', batch_size=32, learning_rate=0.01)
+    net.train('./data/imagenet10/train', './data/imagenet10/validation',
+              batch_size=32, learning_rate=0.01)
     net.save_model('./', 'trained_alexnet')
 
