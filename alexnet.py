@@ -4,8 +4,9 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.layers import Dense, Dropout, Flatten, Activation, Lambda
 from keras.layers.normalization import BatchNormalization
-from keras.optimizers import RMSprop, SGD, Adagrad
-from keras.preprocessing.image import ImageDataGenerator
+from keras.optimizers import RMSprop, SGD, Adagrad, Adam
+from keras.preprocessing.image import (
+    ImageDataGenerator, load_img, img_to_array)
 from keras.callbacks import ModelCheckpoint
 from keras.backend import update_sub
 
@@ -87,6 +88,7 @@ class AlexNet:
         opt = RMSprop(lr = learning_rate, decay=1e-6)
         adagrad = Adagrad(lr=learning_rate)
         sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
+        adam = Adam()
         self.model.compile(
             loss='categorical_crossentropy',
             optimizer=opt,
@@ -115,6 +117,21 @@ class AlexNet:
             os.makedirs(save_dir)
         model_path = os.path.join(save_dir, model_name)
         self.model.save(model_path)
+
+
+    def load_weights(self, weight_path):
+        """"""
+        self.model.load_weights(weight_path, by_name=True)
+
+
+    def predict(self, image):
+        """"""
+        x = load_img(image, target_size=self.input_shape)
+        x = img_to_array(x)
+        x = mean_subtraction(x)
+        x = x.reshape((1, *self.input_shape))
+        pred = self.model.predict(x, verbose=1)
+        return pred
 
 
     def _get_data_generator(self, data_path, is_train, batch_size):
