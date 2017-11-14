@@ -218,10 +218,11 @@ class FCN_VGG16:
 def main():
     """"""
     fcn = FCN_VGG16()
+    print(fcn.model.summary())
     # load pretrained
     pretrained_weights = 'fcn_vgg16_weights_tf_dim_ordering_tf_kernels.h5'
     fcn.load_weights(pretrained_weights)
-    fcn.train(resume_training=False)
+    fcn.train(resume_training=True)
 
 
 if __name__ == '__main__':
