@@ -174,8 +174,6 @@ class FCN_VGG16:
         train_datagen = SegDataGenerator(
             zoom_range=[0.5, 2.0],
             zoom_maintain_shape=True,
-            crop_mode='random',
-            crop_size=target_size,
             rotation_range=0.,
             shear_range=0,
             horizontal_flip=True,

@@ -7,46 +7,11 @@ import os
 import cv2
 
 
-def center_crop(x, center_crop_size, data_format, **kwargs):
-    if data_format == 'channels_first':
-        centerh, centerw = x.shape[1] // 2, x.shape[2] // 2
-    elif data_format == 'channels_last':
-        centerh, centerw = x.shape[0] // 2, x.shape[1] // 2
-    lh, lw = center_crop_size[0] // 2, center_crop_size[1] // 2
-    rh, rw = center_crop_size[0] - lh, center_crop_size[1] - lw
-
-    h_start, h_end = centerh - lh, centerh + rh
-    w_start, w_end = centerw - lw, centerw + rw
-    if data_format == 'channels_first':
-        return x[:, h_start:h_end, w_start:w_end]
-    elif data_format == 'channels_last':
-        return x[h_start:h_end, w_start:w_end, :]
-
-
-def pair_center_crop(x, y, center_crop_size, data_format, **kwargs):
-    if data_format == 'channels_first':
-        centerh, centerw = x.shape[1] // 2, x.shape[2] // 2
-    elif data_format == 'channels_last':
-        centerh, centerw = x.shape[0] // 2, x.shape[1] // 2
-    lh, lw = center_crop_size[0] // 2, center_crop_size[1] // 2
-    rh, rw = center_crop_size[0] - lh, center_crop_size[1] - lw
-
-    h_start, h_end = centerh - lh, centerh + rh
-    w_start, w_end = centerw - lw, centerw + rw
-    if data_format == 'channels_first':
-        return x[:, h_start:h_end, w_start:w_end], \
-               y[:, h_start:h_end, w_start:w_end]
-    elif data_format == 'channels_last':
-        return x[h_start:h_end, w_start:w_end, :], \
-               y[h_start:h_end, w_start:w_end, :]
-
-
 def random_crop(x, random_crop_size, data_format, sync_seed=None, **kwargs):
+    "channel last"
+    # pylint: disable=no-member
     np.random.seed(sync_seed)
-    if data_format == 'channels_first':
-        h, w = x.shape[1], x.shape[2]
-    elif data_format == 'channels_last':
-        h, w = x.shape[0], x.shape[1]
+    h, w = x.shape[0], x.shape[1]
     rangeh = (h - random_crop_size[0]) // 2
     rangew = (w - random_crop_size[1]) // 2
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
@@ -54,18 +19,14 @@ def random_crop(x, random_crop_size, data_format, sync_seed=None, **kwargs):
 
     h_start, h_end = offseth, offseth + random_crop_size[0]
     w_start, w_end = offsetw, offsetw + random_crop_size[1]
-    if data_format == 'channels_first':
-        return x[:, h_start:h_end, w_start:w_end]
-    elif data_format == 'channels_last':
-        return x[h_start:h_end, w_start:w_end, :]
+    return x[h_start:h_end, w_start:w_end, :]
 
 
 def pair_random_crop(x, y, random_crop_size, data_format, sync_seed=None, **kwargs):
+    # pylint: disable=no-member
     np.random.seed(sync_seed)
-    if data_format == 'channels_first':
-        h, w = x.shape[1], x.shape[2]
-    elif data_format == 'channels_last':
-        h, w = x.shape[0], x.shape[1]
+    # channel last
+    h, w = x.shape[0], x.shape[1]
     rangeh = (h - random_crop_size[0]) // 2
     rangew = (w - random_crop_size[1]) // 2
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
@@ -73,10 +34,8 @@ def pair_random_crop(x, y, random_crop_size, data_format, sync_seed=None, **kwar
 
     h_start, h_end = offseth, offseth + random_crop_size[0]
     w_start, w_end = offsetw, offsetw + random_crop_size[1]
-    if data_format == 'channels_first':
-        return x[:, h_start:h_end, w_start:w_end], y[:, h_start:h_end, h_start:h_end]
-    elif data_format == 'channels_last':
-        return x[h_start:h_end, w_start:w_end, :], y[h_start:h_end, w_start:w_end, :]
+    # channel last
+    return x[h_start:h_end, w_start:w_end, :], y[h_start:h_end, w_start:w_end, :]
 
 
 class SegDirectoryIterator(Iterator):
@@ -101,14 +60,13 @@ class SegDirectoryIterator(Iterator):
     def __init__(self, file_path, seg_data_generator,
                  data_dir, data_suffix,
                  label_dir, label_suffix, classes, ignore_label=255,
-                 crop_mode='none', label_cval=255, pad_size=None,
+                 label_cval=255, pad_size=None,
                  target_size=None, color_mode='rgb',
-                 data_format='default', class_mode='sparse',
+                 class_mode='sparse',
                  batch_size=1, shuffle=True, seed=None,
                  save_to_dir=None, save_prefix='', save_format='jpeg',
                  loss_shape=None):
-        if data_format == 'default':
-            data_format = K.image_data_format()
+        data_format = K.image_data_format()
         self.file_path = file_path
         self.data_dir = data_dir
         self.data_suffix = data_suffix
@@ -118,7 +76,6 @@ class SegDirectoryIterator(Iterator):
         self.seg_data_generator = seg_data_generator
         self.target_size = tuple(target_size)
         self.ignore_label = ignore_label
-        self.crop_mode = crop_mode
         self.label_cval = label_cval
         self.pad_size = pad_size
         if color_mode not in {'rgb', 'grayscale'}:
@@ -135,19 +92,11 @@ class SegDirectoryIterator(Iterator):
             self.label_file_format = 'img'
         if target_size:
             if self.color_mode == 'rgb':
-                if self.data_format == 'channels_last':
-                    self.image_shape = self.target_size + (3,)
-                else:
-                    self.image_shape = (3,) + self.target_size
+                self.image_shape = self.target_size + (3,)
             else:
-                if self.data_format == 'channels_last':
-                    self.image_shape = self.target_size + (1,)
-                else:
-                    self.image_shape = (1,) + self.target_size
-            if self.data_format == 'channels_last':
-                self.label_shape = self.target_size + (self.nb_label_ch,)
-            else:
-                self.label_shape = (self.nb_label_ch,) + self.target_size
+                self.image_shape = self.target_size + (1,)
+
+            self.label_shape = self.target_size + (self.nb_label_ch,)
         elif batch_size != 1:
             raise ValueError(
                 'Batch size must be 1 when target image size is undetermined')
@@ -189,7 +138,6 @@ class SegDirectoryIterator(Iterator):
         # The transformation of images is not under thread lock so it can be
         # done in parallel
         if self.target_size:
-            # TODO(ahundt) make dtype properly configurable
             batch_x = np.zeros((current_batch_size,) + self.image_shape)
             if self.loss_shape is None and self.label_file_format is 'img':
                 batch_y = np.zeros((current_batch_size,) + self.label_shape,
@@ -218,34 +166,19 @@ class SegDirectoryIterator(Iterator):
 
             # do padding
             if self.target_size:
-                if self.crop_mode != 'none':
-                    x = img_to_array(img, data_format=self.data_format)
-                    if self.label_file_format is not 'npy':
-                        y = img_to_array(
-                            label, data_format=self.data_format).astype(int)
-                    img_w, img_h = img.size
-                    if self.pad_size:
-                        pad_w = max(self.pad_size[1] - img_w, 0)
-                        pad_h = max(self.pad_size[0] - img_h, 0)
-                    else:
-                        pad_w = max(self.target_size[1] - img_w, 0)
-                        pad_h = max(self.target_size[0] - img_h, 0)
-                    if self.data_format == 'channels_first':
-                        x = np.lib.pad(x, ((0, 0), (pad_h / 2, pad_h - pad_h / 2), (pad_w / 2, pad_w - pad_w / 2)), 'constant', constant_values=0.)
-                        y = np.lib.pad(y, ((0, 0), (pad_h / 2, pad_h - pad_h / 2), (pad_w / 2, pad_w - pad_w / 2)),
-                                       'constant', constant_values=self.label_cval)
-                    elif self.data_format == 'channels_last':
-                        x = np.lib.pad(x, ((pad_h / 2, pad_h - pad_h / 2), (pad_w / 2, pad_w - pad_w / 2), (0, 0)), 'constant', constant_values=0.)
-                        y = np.lib.pad(y, ((pad_h / 2, pad_h - pad_h / 2), (pad_w / 2, pad_w - pad_w / 2), (0, 0)), 'constant', constant_values=self.label_cval)
+                x = img_to_array(img, data_format=self.data_format)
+                if self.label_file_format is not 'npy':
+                    y = img_to_array(
+                        label, data_format=self.data_format).astype(int)
+                img_w, img_h = img.size
+                if self.pad_size:
+                    pad_w = max(self.pad_size[1] - img_w, 0)
+                    pad_h = max(self.pad_size[0] - img_h, 0)
                 else:
-                    x = img_to_array(img.resize((self.target_size[1], self.target_size[0]),
-                                                Image.BILINEAR),
-                                     data_format=self.data_format)
-                    if self.label_file_format is not 'npy':
-                        y = img_to_array(label.resize((self.target_size[1], self.target_size[
-                                         0]), Image.NEAREST), data_format=self.data_format).astype(int)
-                    else:
-                        print('ERROR: resize not implemented for label npy file')
+                    pad_w = max(self.target_size[1] - img_w, 0)
+                    pad_h = max(self.target_size[0] - img_h, 0)
+                x = np.lib.pad(x, ((pad_h / 2, pad_h - pad_h / 2), (pad_w / 2, pad_w - pad_w / 2), (0, 0)), 'constant', constant_values=0.)
+                y = np.lib.pad(y, ((pad_h / 2, pad_h - pad_h / 2), (pad_w / 2, pad_w - pad_w / 2), (0, 0)), 'constant', constant_values=self.label_cval)
 
             if self.target_size is None:
                 batch_x = np.zeros((current_batch_size,) + x.shape)
@@ -254,8 +187,7 @@ class SegDirectoryIterator(Iterator):
                 else:
                     batch_y = np.zeros((current_batch_size,) + y.shape)
 
-            x, y = self.seg_data_generator.random_transform(x, y)
-            x = self.seg_data_generator.standardize(x)
+            x, y = self.seg_data_generator.random_transform(x, y, self.target_size)
 
             if self.ignore_label:
                 y[np.where(y == self.ignore_label)] = self.classes
@@ -267,6 +199,7 @@ class SegDirectoryIterator(Iterator):
             batch_y[i] = y
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
+            # pylint: disable=no-member
             for i in range(current_batch_size):
                 img = array_to_img(batch_x[i], self.data_format, scale=True)
                 label = batch_y[i][:, :, 0].astype('uint8')
@@ -291,11 +224,6 @@ class SegDirectoryIterator(Iterator):
 class SegDataGenerator(object):
 
     def __init__(self,
-                 featurewise_center=False,
-                 samplewise_center=False,
-                 featurewise_std_normalization=False,
-                 samplewise_std_normalization=False,
-                 channelwise_center=False,
                  rotation_range=0.,
                  width_shift_range=0.,
                  height_shift_range=0.,
@@ -306,38 +234,27 @@ class SegDataGenerator(object):
                  fill_mode='constant',
                  cval=0.,
                  label_cval=255,
-                 crop_mode='none',
-                 crop_size=(0, 0),
                  pad_size=None,
                  horizontal_flip=False,
-                 vertical_flip=False,
-                 rescale=None,
-                 data_format='default'):
-        if data_format == 'default':
-            data_format = K.image_data_format()
-        self.__dict__.update(locals())
-        self.mean = None
-        self.ch_mean = None
-        self.std = None
-        self.principal_components = None
-        self.rescale = rescale
+                 vertical_flip=False
+                 ):
+        data_format = K.image_data_format()
+        self.rotation_range=rotation_range
+        self.width_shift_range = width_shift_range
+        self.height_shift_range = height_shift_range
+        self.shear_range = shear_range
+        self.fill_mode = fill_mode
+        self.cval = cval
+        self.label_cval=label_cval
+        self.zoom_maintain_shape = zoom_maintain_shape
 
-        if data_format not in {'channels_last', 'channels_first'}:
-            raise Exception('data_format should be channels_last (channel after row and '
-                            'column) or channels_first (channel before row and column). '
-                            'Received arg: ', data_format)
-        if crop_mode not in {'none', 'random', 'center'}:
-            raise Exception('crop_mode should be "none" or "random" or "center" '
-                            'Received arg: ', crop_mode)
+        self.horizontal_flip = horizontal_flip
+        self.vertical_flip = vertical_flip
+
         self.data_format = data_format
-        if data_format == 'channels_first':
-            self.channel_index = 1
-            self.row_index = 2
-            self.col_index = 3
-        if data_format == 'channels_last':
-            self.channel_index = 3
-            self.row_index = 1
-            self.col_index = 2
+        self.channel_index = 3
+        self.row_index = 1
+        self.col_index = 2
 
         if np.isscalar(zoom_range):
             self.zoom_range = [1 - zoom_range, 1 + zoom_range]
@@ -356,50 +273,26 @@ class SegDataGenerator(object):
                             batch_size=32, shuffle=True, seed=None,
                             save_to_dir=None, save_prefix='', save_format='jpeg',
                             loss_shape=None):
-        if self.crop_mode == 'random' or self.crop_mode == 'center':
-            target_size = self.crop_size
         return SegDirectoryIterator(
             file_path, self,
             data_dir=data_dir, data_suffix=data_suffix,
             label_dir=label_dir, label_suffix=label_suffix,
             classes=classes, ignore_label=ignore_label,
-            crop_mode=self.crop_mode, label_cval=self.label_cval,
-            pad_size=self.pad_size,
+            label_cval=self.label_cval,
             target_size=target_size, color_mode=color_mode,
-            data_format=self.data_format, class_mode=class_mode,
+            class_mode=class_mode,
             batch_size=batch_size, shuffle=shuffle, seed=seed,
             save_to_dir=save_to_dir, save_prefix=save_prefix,
             save_format=save_format,
             loss_shape=loss_shape)
 
-    def standardize(self, x):
-        if self.rescale:
-            x *= self.rescale
-        # x is a single image, so it doesn't have image number at index 0
-        img_channel_index = self.channel_index - 1
-        if self.samplewise_center:
-            x -= np.mean(x, axis=img_channel_index, keepdims=True)
-        if self.samplewise_std_normalization:
-            x /= (np.std(x, axis=img_channel_index, keepdims=True) + 1e-7)
 
-        if self.featurewise_center:
-            x -= self.mean
-        if self.featurewise_std_normalization:
-            x /= (self.std + 1e-7)
-
-        if self.channelwise_center:
-            x -= self.ch_mean
-        return x
-
-    def random_transform(self, x, y):
+    def random_transform(self, x, y, crop_size):
+        # pylint: disable=no-member
         # x is a single image, so it doesn't have image number at index 0
         img_row_index = self.row_index - 1
         img_col_index = self.col_index - 1
         img_channel_index = self.channel_index - 1
-        if self.crop_mode == 'none':
-            crop_size = (x.shape[img_row_index], x.shape[img_col_index])
-        else:
-            crop_size = self.crop_size
 
         assert x.shape[img_row_index] == y.shape[img_row_index] and x.shape[img_col_index] == y.shape[
             img_col_index], 'DATA ERROR: Different shape of data and label!\ndata shape: %s, label shape: %s' % (str(x.shape), str(y.shape))
@@ -462,9 +355,6 @@ class SegDataGenerator(object):
         y = apply_transform(y, transform_matrix, img_channel_index,
                             fill_mode='constant', cval=self.label_cval)
 
-        if self.channel_shift_range != 0:
-            x = random_channel_shift(
-                x, self.channel_shift_range, img_channel_index)
 
         if self.horizontal_flip:
             if np.random.random() < 0.5:
@@ -476,44 +366,6 @@ class SegDataGenerator(object):
                 x = flip_axis(x, img_row_index)
                 y = flip_axis(y, img_row_index)
 
-        if self.crop_mode == 'center':
-            x, y = pair_center_crop(x, y, self.crop_size, self.data_format)
-        elif self.crop_mode == 'random':
-            x, y = pair_random_crop(x, y, self.crop_size, self.data_format)
+        x, y = pair_random_crop(x, y, crop_size, self.data_format)
 
-        # TODO:
-        # channel-wise normalization
-        # barrel/fisheye
         return x, y
-
-    def fit(self, X,
-            augment=False,
-            rounds=1,
-            seed=None):
-        '''Required for featurewise_center and featurewise_std_normalization
-
-        # Arguments
-            X: Numpy array, the data to fit on.
-            augment: whether to fit on randomly augmented samples
-            rounds: if `augment`,
-                how many augmentation passes to do over the data
-            seed: random seed.
-        '''
-        X = np.copy(X)
-        if augment:
-            aX = np.zeros(tuple([rounds * X.shape[0]] + list(X.shape)[1:]))
-            for r in range(rounds):
-                for i in range(X.shape[0]):
-                    aX[i + r * X.shape[0]] = self.random_transform(X[i])
-            X = aX
-
-        if self.featurewise_center:
-            self.mean = np.mean(X, axis=0)
-            X -= self.mean
-
-        if self.featurewise_std_normalization:
-            self.std = np.std(X, axis=0)
-            X /= (self.std + 1e-7)
-
-    def set_ch_mean(self, ch_mean):
-        self.ch_mean = ch_mean
