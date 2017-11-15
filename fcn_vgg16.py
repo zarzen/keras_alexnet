@@ -3,16 +3,19 @@ Architecture based on vgg16
 """
 import keras.backend as K
 import tensorflow as tf
-from BilinearUpSampling import *
+from up_sampling import *
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout
 from keras.regularizers import l2
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint
-from SegDataGenerator import SegDataGenerator
+from data_generator import SegDataGenerator
 from os.path import expanduser
 
-def softmax_sparse_crossentropy_ignoring_last_label(y_true, y_pred):
+
+
+def softmax_crossentropy_ignoring_last_label(y_true, y_pred):
+    """loss function"""
     y_pred = K.reshape(y_pred, (-1, K.int_shape(y_pred)[-1]))
     log_softmax = tf.nn.log_softmax(y_pred)
 
@@ -26,15 +29,9 @@ def softmax_sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     return cross_entropy_mean
 
 
-def binary_crossentropy_with_logits(ground_truth, predictions):
-    return K.mean(
-        K.binary_crossentropy(ground_truth,
-                              predictions,
-                              from_logits=True),
-        axis=-1)
-
 # accuracy measurement
-def sparse_accuracy_ignoring_last_label(y_true, y_pred):
+def accuracy_ignoring_last_label(y_true, y_pred):
+    """ performance metric"""
     nb_classes = K.int_shape(y_pred)[-1]
     y_pred = K.reshape(y_pred, (-1, nb_classes))
 
@@ -160,11 +157,12 @@ class FCN_VGG16:
         label_cval = 255
         batch_size = 16
         target_size = self.input_size[:2]
-        metrics = [sparse_accuracy_ignoring_last_label]
+        metrics = [accuracy_ignoring_last_label]
         opt = Adam(lr=learning_rate)
+        # opt = SGD(lr=learning_rate, momentum=0.9)
 
         # compile
-        self.model.compile(loss=softmax_sparse_crossentropy_ignoring_last_label,
+        self.model.compile(loss=softmax_crossentropy_ignoring_last_label,
                            optimizer=opt,
                            metrics=metrics)
         if resume_training:
@@ -222,7 +220,7 @@ def main():
     # load pretrained
     pretrained_weights = 'fcn_vgg16_weights_tf_dim_ordering_tf_kernels.h5'
     fcn.load_weights(pretrained_weights)
-    fcn.train(resume_training=True)
+    fcn.train(learning_rate=0.001, resume_training=False)
 
 
 if __name__ == '__main__':
