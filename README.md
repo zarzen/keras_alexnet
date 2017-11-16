@@ -1,4 +1,4 @@
-# Homework3
+# Homework3 Report
 
 ## Task 1
 The implementation of `alexnet` is in `alexnet.py` file. 
@@ -20,18 +20,26 @@ The training process includes data augmentation procedure.
 Here includes some training log:
 ```
 Epoch 77/100
-1249/1250 [============================>.] - ETA: 0s - loss: 0.0142 - acc: 0.9949Epoch 00077: val_acc improved from 0.84103 to 0.84103, saving model to weights.be$
+1249/1250 [============================>.] - ETA: 0s - loss: 0.0142 - acc: 0.9949
+Epoch 00077: val_acc improved from 0.84103 to 0.84103, saving model to weights.be$
 t.hdf5
-1250/1250 [==============================] - 512s 410ms/step - loss: 0.0142 - acc: 0.9949 - val_loss: 1.3126 - val_acc: 0.8410
+1250/1250 [==============================] - 512s 410ms/step - loss: 0.0142 - acc: 0.9949 
+- val_loss: 1.3126 - val_acc: 0.8410
 Epoch 78/100
-1249/1250 [============================>.] - ETA: 0s - loss: 0.0138 - acc: 0.9947Epoch 00078: val_acc did not improve
-1250/1250 [==============================] - 487s 390ms/step - loss: 0.0138 - acc: 0.9947 - val_loss: 1.5278 - val_acc: 0.8205
+1249/1250 [============================>.] - ETA: 0s - loss: 0.0138 - acc: 0.9947
+Epoch 00078: val_acc did not improve
+1250/1250 [==============================] - 487s 390ms/step - loss: 0.0138 - acc: 0.9947 
+- val_loss: 1.5278 - val_acc: 0.8205
 Epoch 79/100
-1249/1250 [============================>.] - ETA: 0s - loss: 0.0147 - acc: 0.9949Epoch 00079: val_acc did not improve
-1250/1250 [==============================] - 498s 398ms/step - loss: 0.0147 - acc: 0.9949 - val_loss: 1.5069 - val_acc: 0.8090
+1249/1250 [============================>.] - ETA: 0s - loss: 0.0147 - acc: 0.9949
+Epoch 00079: val_acc did not improve
+1250/1250 [==============================] - 498s 398ms/step - loss: 0.0147 - acc: 0.9949 
+- val_loss: 1.5069 - val_acc: 0.8090
 Epoch 80/100
-1249/1250 [============================>.] - ETA: 0s - loss: 0.0138 - acc: 0.9947Epoch 00080: val_acc did not improve
-1250/1250 [==============================] - 502s 401ms/step - loss: 0.0138 - acc: 0.9947 - val_loss: 1.5680 - val_acc: 0.8192
+1249/1250 [============================>.] - ETA: 0s - loss: 0.0138 - acc: 0.9947
+Epoch 00080: val_acc did not improve
+1250/1250 [==============================] - 502s 401ms/step - loss: 0.0138 - acc: 0.9947 
+- val_loss: 1.5680 - val_acc: 0.8192
 ```
 
 We can see model starting overfit on training set after reach the best 
@@ -71,19 +79,27 @@ respectively.
 ```
 # Adam
 Epoch 1/100
-694/695 [============================>.] - ETA: 0s - loss: 1.6255 - accuracy_ignoring_last_label: 0.5834Epoch 00000: val_loss improved from inf to 1.59723, saving model to seg_checkpoint_weights.hdf5
-695/695 [==============================] - 592s - loss: 1.6251 - accuracy_ignoring_last_label: 0.5835 - val_loss: 1.5972 - val_accuracy_ignoring_last_label: 0.6216
+694/695 [============================>.] - ETA: 0s - loss: 1.6255 - accuracy_ignoring_last_label: 0.5834
+Epoch 00000: val_loss improved from inf to 1.59723, saving model to seg_checkpoint_weights.hdf5
+695/695 [==============================] - 592s - loss: 1.6251 - accuracy_ignoring_last_label: 0.5835 
+- val_loss: 1.5972 - val_accuracy_ignoring_last_label: 0.6216
 Epoch 2/100
-694/695 [============================>.] - ETA: 0s - loss: 1.3828 - accuracy_ignoring_last_label: 0.5864Epoch 00001: val_loss improved from 1.59723 to 1.40242, saving model to seg_checkpoint_weights.hdf5
-695/695 [==============================] - 585s - loss: 1.3830 - accuracy_ignoring_last_label: 0.5863 - val_loss: 1.4024 - val_accuracy_ignoring_last_label: 0.6234
+694/695 [============================>.] - ETA: 0s - loss: 1.3828 - accuracy_ignoring_last_label: 0.5864
+Epoch 00001: val_loss improved from 1.59723 to 1.40242, saving model to seg_checkpoint_weights.hdf5
+695/695 [==============================] - 585s - loss: 1.3830 - accuracy_ignoring_last_label: 0.5863 
+- val_loss: 1.4024 - val_accuracy_ignoring_last_label: 0.6234
 
 # SGD
 Epoch 1/100
-694/695 [============================>.] - ETA: 0s - loss: 0.7014 - sparse_accuracy_ignoring_last_label: 0.7464Epoch 00000: val_loss improved from inf to 0.51831, saving model to seg_checkpoint_weights.hdf5
-695/695 [==============================] - 554s - loss: 0.7014 - sparse_accuracy_ignoring_last_label: 0.7464 - val_loss: 0.5183 - val_sparse_accuracy_ignoring_last_label: 0.8191
+694/695 [============================>.] - ETA: 0s - loss: 0.7014 - sparse_accuracy_ignoring_last_label: 0.7464
+Epoch 00000: val_loss improved from inf to 0.51831, saving model to seg_checkpoint_weights.hdf5
+695/695 [==============================] - 554s - loss: 0.7014 - sparse_accuracy_ignoring_last_label: 0.7464 
+- val_loss: 0.5183 - val_sparse_accuracy_ignoring_last_label: 0.8191
 Epoch 2/100
-694/695 [============================>.] - ETA: 0s - loss: 0.4930 - sparse_accuracy_ignoring_last_label: 0.8082Epoch 00001: val_loss improved from 0.51831 to 0.48101, saving model to seg_checkpoint_weights.hdf5
-695/695 [==============================] - 551s - loss: 0.4928 - sparse_accuracy_ignoring_last_label: 0.8083 - val_loss: 0.4810 - val_sparse_accuracy_ignoring_last_label: 0.8308
+694/695 [============================>.] - ETA: 0s - loss: 0.4930 - sparse_accuracy_ignoring_last_label: 0.8082
+Epoch 00001: val_loss improved from 0.51831 to 0.48101, saving model to seg_checkpoint_weights.hdf5
+695/695 [==============================] - 551s - loss: 0.4928 - sparse_accuracy_ignoring_last_label: 0.8083 
+- val_loss: 0.4810 - val_sparse_accuracy_ignoring_last_label: 0.8308
 
 ```
 We can see `Adam` optimizer is not panacea. 

@@ -129,7 +129,8 @@ class AlexNet:
         x = load_img(image, target_size=self.input_shape)
         x = img_to_array(x)
         x = mean_subtraction(x)
-        x = x.reshape((1, *self.input_shape))
+        x = x.reshape((1, self.input_shape[0],
+                       self.input_shape[1], self.input_shape[2]))
         pred = self.model.predict(x, verbose=1)
         return pred
 
